@@ -1,18 +1,45 @@
 import welcome from 'shared/welcome'
-import jQuery from 'jquery'
 
 welcome('background/index.js')
 
 
-
-
-if (jQuery) {  
-    // jQuery is loaded  
-    alert("Yeah!");
-} else {
-    // jQuery is not loaded
-    alert("Doesn't Work");
+function getCookies(domain, name, callback) {
+    chrome.cookies.get({"url": domain, "name": name}, function(cookie) {
+        if(callback) {
+            callback(cookie.value);
+        }
+    });
 }
+
+
+  chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    console.log(sender.tab ?
+                "from a content script:" + sender.tab.url :
+                "from the extension");
+    if (request.greeting == "hello")
+      sendResponse({farewell: "goodbye"});
+  });
+
+
+
+
+// getCookies("http://maps.au.nearmap.com", "nearmap_web3_app", function(id) {
+//     alert(id);
+// });
+
+// alert(chrome.cookies.getAllCookieStores());
+
+// chrome.tabs.executeScript(tab.id, {file: 'inject_this.js'}, function() {
+//   console.log('Successfully injected script into the page');
+// });
+
+
+// chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
+//   console.log(response.farewell);
+//   alert('sending message')
+// });
+
 
 
 

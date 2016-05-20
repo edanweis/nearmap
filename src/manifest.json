@@ -6,7 +6,8 @@
       "matches": [
         "*://*.nearmap.com/*"
       ],
-      "js": ["content/index.js"]
+      "js": ["content/index.js"],
+      "run_at": "document_end"
     }
   ],
   "background": {
@@ -18,7 +19,8 @@
     "default_popup": "popup/index.html"
   },
   "permissions": [
-    "background"
+    "background",
+    "<all_urls>"
   ],
   "icons": {
     "16": "icons/webpack-16.png",
