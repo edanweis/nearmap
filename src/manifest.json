@@ -19,8 +19,14 @@
     "default_popup": "popup/index.html"
   },
   "permissions": [
+    "cookies",
+    "webRequest",
+    "webRequestBlocking",
     "background",
-    "<all_urls>"
+    "<all_urls>",
+    "tabs", 
+    "http://*/*",
+    "https://*/*"
   ],
   "icons": {
     "16": "icons/webpack-16.png",

@@ -4,18 +4,7 @@ export default function(script) {
   console.log("%c >>You can use npm packages, import/export, ES6, ES7, JSX, or anything you know from modern javascript development<<", style)
 
 
-  chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    console.log(sender.tab ?
-                "from a content script:" + sender.tab.url :
-                "from the extension");
-    if (request.greeting == "hello")
-      sendResponse({farewell: "goodbye"});
-  });
 
-chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
-  console.log(response.farewell);
-});
 
 
 }
