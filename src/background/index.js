@@ -1,49 +1,44 @@
 import welcome from 'shared/welcome'
 welcome('background/index.js');
-// var GeoPoint = require('geopoint')
-import GeoPoint from 'geopoint';
-
-
+var geodesy = require('geodesy')
 
 function getTiles(bounds){
   var bbox = bounds.split(","),
-  
-      NW = new GeoPoint(parseFloat(bbox[1]), parseFloat(bbox[0])),
-      NE = new GeoPoint(parseFloat(bbox[3]), parseFloat(bbox[0])),
-      SE = new GeoPoint(parseFloat(bbox[3]), parseFloat(bbox[2])),
-      SW = new GeoPoint(parseFloat(bbox[1]), parseFloat(bbox[2])); 
-  
-  var x_dist = NE.distanceTo(NW, true),
-      y_dist = NW.distanceTo(SW, true)
+      NW = new geodesy.LatLonEllipsoidal(parseFloat(bbox[1]), parseFloat(bbox[0])),
+      NE = new geodesy.LatLonEllipsoidal(parseFloat(bbox[3]), parseFloat(bbox[0])),
+      SE = new geodesy.LatLonEllipsoidal(parseFloat(bbox[3]), parseFloat(bbox[2])),
+      SW = new geodesy.LatLonEllipsoidal(parseFloat(bbox[1]), parseFloat(bbox[2]));
 
-  var m2 = x_dist * y_dist;
+  var x_dist = SE.distanceTo(NE),
+      y_dist = SE.distanceTo(SW);
 
-  return m2
-  
+  var res1 = 13.396648496, // 0.07464553543474244
+      res2 = 6.698324248 // 0.14929107086948487
+
+  var cx = 1.264877433,
+      cy = 1.26984127
+
+  console.log("width: " + Math.round(x_dist * res2 * cx) +"  height: " + Math.round(y_dist * res2 * cy))
 }
 
-function getCookies(domain, name, callback) {
-    chrome.cookies.get({"url": domain, "name": name}, function(cookie) {
-        if(callback) {
-            callback(cookie.value);
-        }
-    });
-}
 
-getCookies("http://maps.au.nearmap.com", "nearmap_web3_app", function(id) {
-    console.log(id)
-});
 
 var WEB_REQUEST = chrome.webRequest;
 
 WEB_REQUEST.onBeforeRequest.addListener(
     function(details) {
         if(details.method == "POST"){
-            console.log(details)
+            
           } else if(details.method == 'GET'){
-            console.log(getTiles(getParameterByName('bbox', details.url)))
-
-            // console.log(getParameterByName('bbox', details.url))
+            if (details.url.indexOf('imageprofile') > -1){
+              getTiles(getParameterByName('bbox', details.url))
+              // send message to our tab to inject the save button.
+              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {msg: "inject"}, function(response) {
+                  // console.log(response.farewell);
+                });
+              });
+            }
           }
     },
     {urls: ["*://*.nearmap.com/*"]},
@@ -67,18 +62,16 @@ function getParameterByName(name, url) {
 }
 
 
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  chrome.tabs.sendMessage(tabs[0].id, {greeting: "hello"}, function(response) {
-    // console.log(response.farewell);
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    console.log(sender.tab ?
+                "from a content script:" + sender.tab.url :
+                "from the extension");
+    // if (request.greeting == "hello")
+    //   sendResponse({farewell: "goodbye"});
+    console.log(request.greeting)
+
   });
-});
-
-// alert(chrome.cookies.getAllCookieStores());
-
-// chrome.tabs.executeScript(tab.id, {file: 'inject_this.js'}, function() {
-//   console.log('Successfully injected script into the page');
-// });
-
 
 
 
