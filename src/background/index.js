@@ -18,9 +18,32 @@ function getTiles(bounds){
   var cx = 1.264877433,
       cy = 1.26984127
 
+  // var res = [Math.round(x_dist * res2 * cx), Math.round(y_dist * res2 * cy)]
+  var res = [x_dist * cx, y_dist * cy]
+  var dim = [x_dist, y_dist]
+
   console.log("width: " + Math.round(x_dist * res2 * cx) +"  height: " + Math.round(y_dist * res2 * cy))
+  
+  var geodata = {
+    "res": res,
+    "dim": dim,
+    "bbox": bbox
+  }
+
+  return geodata
 }
 
+chrome.runtime.onConnect.addListener(function(port) {
+  console.assert(port.name == "cloudsend");
+  port.onMessage.addListener(function(msg) {
+    if (msg.type == "request"){
+      console.log("received request from: " + msg.content )
+    }
+    if (msg.type = "data"){
+      console.log("received urls from content script: "+ msg.content)
+    }
+  });
+});
 
 
 var WEB_REQUEST = chrome.webRequest;
@@ -31,10 +54,13 @@ WEB_REQUEST.onBeforeRequest.addListener(
             
           } else if(details.method == 'GET'){
             if (details.url.indexOf('imageprofile') > -1){
-              getTiles(getParameterByName('bbox', details.url))
+              
               // send message to our tab to inject the save button.
               chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, {msg: "inject"}, function(response) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                  msg: "inject",
+                  geodata: getTiles(getParameterByName('bbox', details.url))
+                }, function(response) {
                   // console.log(response.farewell);
                 });
               });
@@ -63,17 +89,17 @@ function getParameterByName(name, url) {
 
 
 chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    console.log(sender.tab ?
-                "from a content script:" + sender.tab.url :
-                "from the extension");
-    // if (request.greeting == "hello")
-    //   sendResponse({farewell: "goodbye"});
-    console.log(request.greeting)
-
-  });
-
-
+    function(request, sender, sendResponse) {
+        switch(request.msg) {
+            case "getGeodata":
+                sendResponse("here's your data from background page");
+                return true
+                break;
+            default:
+                console.error("Unrecognised message: ", request);
+        }
+    }
+);
 
 // Setting popup icon
 
