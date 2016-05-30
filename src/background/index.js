@@ -2,6 +2,8 @@ import welcome from 'shared/welcome'
 welcome('background/index.js');
 var geodesy = require('geodesy')
 
+var clouddata = "empty cloud data";
+
 function getTiles(bounds){
   var bbox = bounds.split(","),
       NW = new geodesy.LatLonEllipsoidal(parseFloat(bbox[1]), parseFloat(bbox[0])),
@@ -37,10 +39,16 @@ chrome.runtime.onConnect.addListener(function(port) {
   console.assert(port.name == "cloudsend");
   port.onMessage.addListener(function(msg) {
     if (msg.type == "request"){
-      console.log("received request from: " + msg.content )
+      // console.log("received request: " + msg.content )
+      // port.postMessage({type: "data", content: clouddata});
     }
-    if (msg.type = "data"){
-      console.log("received urls from content script: "+ msg.content)
+    if (msg.type == "data"){
+      // console.log("received urls from content script: "+ msg.content)
+       // port.postMessage({type: "data", content: clouddata});
+       clouddata = msg.content
+    }
+    if (msg.type == "from_popup"){
+      port.postMessage({type: "data", content: clouddata});
     }
   });
 });
@@ -61,7 +69,7 @@ WEB_REQUEST.onBeforeRequest.addListener(
                   msg: "inject",
                   geodata: getTiles(getParameterByName('bbox', details.url))
                 }, function(response) {
-                  // console.log(response.farewell);
+                  // console.log(response.clouddata)
                 });
               });
             }

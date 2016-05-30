@@ -3,7 +3,7 @@ import 'jquery'
 welcome('content/index.js')
 
 // global vars
-var geodata = "empty"
+var urls = null;
 var resolution_list = '<div style="display:inline; float: right;"><select class="injected"><option value="0.07464553543474244">0.075 (Highest)</option><option value="0.14929107086948487">0.149</option><option value="0.29858214173896974">0.299</option><option value="0.5971642834779395">0.597</option><option value="1.194328566955879">1.194</option><option value="2.388657133911758">2.389</option><option value="4.777314267823516">4.777</option><option value="9.554628535647032">9.555 (Lowest)</option></select></div>';
 var cloud_button = $('<a href="#" class="button warning save-cloud" style="background-color: #FF4552; text-decoration: none">Send to Cloud</a>');
 
@@ -15,7 +15,7 @@ chrome.runtime.onMessage.addListener(
         switch(request.msg) {
             case "inject":
             	injectSaveBtn()
-            	sendResponse("cool");
+            	// sendResponse("cool");
             	break;
             default:
                 console.error("Unrecognised message: ", request);
@@ -27,10 +27,9 @@ chrome.runtime.onMessage.addListener(
 var port = chrome.runtime.connect({name: "cloudsend"});
 
 port.onMessage.addListener(function(msg) {
-  // if (msg.question == "Who's there?")
-  //   port.postMessage({answer: "Madame"});
-  // else if (msg.question == "Madame who?")
-    
+    if (msg.type == 'request'){
+    	port.postMessage({type: "data", content: "bla blah blh"})
+    }
 });
 
 
@@ -62,7 +61,7 @@ function injectSaveBtn(){
 	// check if elements have not already been modified - triggered from a previous GET request
 	if ($('div.save-image > div.right > a.save-cloud').length <= 0){
 		cloud_button.on('click', function(){
-			sendToCloud(geodata)	
+			sendToCloud(urls)	
 		})
 		$('div.map-resolution > div.unit-view').hide();
 		$('div.map-resolution').append(resolution_list);
@@ -74,12 +73,12 @@ function injectSaveBtn(){
 		setTimeout(function(){
 			updateNearmap($('select.injected'))
 
-		 }, 100);
+		 }, 500);
 	} else{
 		setTimeout(function(){
 			updateNearmap($('select.injected'))
 			
-		}, 100);
+		}, 500);
 	}
 }
 
@@ -91,7 +90,7 @@ function sendToCloud(geodata){
 	// }, function(response) {
 	//   console.log(response.farewell);
 	// });
-	port.postMessage({data: "some urls"});
+	port.postMessage({type: "data", content: $('select.injected').val()});
 }
 
 // $(".panel-content").bind("DOMSubtreeModified", function() {

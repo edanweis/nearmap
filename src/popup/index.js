@@ -27,13 +27,13 @@ getCookies("http://maps.au.nearmap.com", "nearmap_web3_app", function(id) {
 
 var port = chrome.runtime.connect({name: "cloudsend"});
 
-port.postMessage({type: "request", content: "hello from popup"});
+port.postMessage({type: "from_popup"});
 
 port.onMessage.addListener(function(msg) {
-  if (msg.type == "request"){
-      console.log("received request: " + msg.content )
-    }
+  // if (msg.type == "request"){
+  //     console.log("received request: " + msg.content )
+  //   }
     if (msg.type = "data"){
-      console.log("received data: "+ msg.content)
+   		document.getElementById('data').textContent = msg.content;   
     }
 });
