@@ -84,12 +84,6 @@ function injectSaveBtn(){
 
 
 function sendToCloud(geodata){
-	// console.log(geodata)
-	// chrome.runtime.sendMessage({
-	// 	geodata: geodata
-	// }, function(response) {
-	//   console.log(response.farewell);
-	// });
 	port.postMessage({type: "data", content: $('select.injected').val()});
 }
 

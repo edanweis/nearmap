@@ -2,7 +2,7 @@ import welcome from 'shared/welcome'
 welcome('background/index.js');
 var geodesy = require('geodesy')
 
-var clouddata = "empty cloud data";
+var clouddata = null;
 
 function getTiles(bounds){
   var bbox = bounds.split(","),
@@ -38,13 +38,7 @@ function getTiles(bounds){
 chrome.runtime.onConnect.addListener(function(port) {
   console.assert(port.name == "cloudsend");
   port.onMessage.addListener(function(msg) {
-    if (msg.type == "request"){
-      // console.log("received request: " + msg.content )
-      // port.postMessage({type: "data", content: clouddata});
-    }
     if (msg.type == "data"){
-      // console.log("received urls from content script: "+ msg.content)
-       // port.postMessage({type: "data", content: clouddata});
        clouddata = msg.content
     }
     if (msg.type == "from_popup"){
